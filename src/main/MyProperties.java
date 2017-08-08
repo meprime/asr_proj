@@ -1,4 +1,4 @@
-package util;
+package main;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -9,6 +9,7 @@ public class MyProperties {
 	private Properties props;
 	
 	public final static String PROP_LEXICON_PATH = "lexiconPath";
+	public final static String PROP_TRAIN_PATH = "trainPath";
 	
 	private static MyProperties instance;
 	public static MyProperties getInstance() {
@@ -29,5 +30,9 @@ public class MyProperties {
 	
 	public String getProperty(String propName) {
 		return props.getProperty(propName);
+	}
+	
+	public boolean isDebug() {
+		return true;
 	}
 }

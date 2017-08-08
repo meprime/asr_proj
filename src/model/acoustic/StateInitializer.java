@@ -25,5 +25,6 @@ public class StateInitializer {
 		kMeans.runKMeans();
 		state.setMeans(kMeans.getMeans());
 		state.setCovs(kMeans.getCovs());
+		state.setWeights(kMeans.getWeights());
 	}
 }

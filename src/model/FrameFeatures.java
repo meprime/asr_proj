@@ -6,8 +6,16 @@ public class FrameFeatures {
 	
 	private double[] values;
 
+	public FrameFeatures() {
+		values = new double[FEATURES_COUNT];
+	}
+	
 	public double[] getValues() {
 		return this.values;
+	}
+	
+	public void setValues(double[] values) {
+		this.values = values;
 	}
 	
 	public double getValue(int i) {

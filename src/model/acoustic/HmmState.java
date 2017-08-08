@@ -1,5 +1,6 @@
 package model.acoustic;
 
+import java.util.Arrays;
 import java.util.UUID;
 
 import model.FrameFeatures;
@@ -76,7 +77,7 @@ public class HmmState {
 	}
 
 	public double getWeightedProbability(FrameFeatures f, int mixtureInd) {
-		int n = means[0].length;
+		int n = means[mixtureInd].length;
 		double numerator = 0;
 		double denominator = 0;
 		for(int i = 0; i < n; i++) {
@@ -84,9 +85,15 @@ public class HmmState {
 			numerator += z * z / covs[mixtureInd][i];
 			denominator += 2 * Math.PI * covs[mixtureInd][i];
 		}
-		numerator /= -0.5;
+		double q = numerator;
+		numerator /= -2;
 		numerator = Math.exp(numerator);
 		denominator = Math.sqrt(denominator);
+		if(weights[mixtureInd] * numerator / denominator == 0) {
+			System.out.println(numerator + ", " + q + ", " + denominator);
+			System.out.println(Arrays.toString(f.getValues()));
+			System.out.println(Arrays.toString(means[mixtureInd]));
+		}
 		return weights[mixtureInd] * numerator / denominator;
 	}
 }

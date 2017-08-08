@@ -9,16 +9,16 @@ import java.util.Set;
 import model.FrameFeatures;
 import model.acoustic.HmmState;
 
-public class Params {
+public class UpdateParams {
 
 	private Set<Ksi> ksis;
 	private Set<GammaGeneral> gammaGs;
 	private Set<GammaSpecific> gammaSs;
 	
-	public Params() {
-		ksis = new HashSet<Params.Ksi>();
-		gammaGs = new HashSet<Params.GammaGeneral>();
-		gammaSs = new HashSet<Params.GammaSpecific>();
+	public UpdateParams() {
+		ksis = new HashSet<UpdateParams.Ksi>();
+		gammaGs = new HashSet<UpdateParams.GammaGeneral>();
+		gammaSs = new HashSet<UpdateParams.GammaSpecific>();
 	}
 	
 	public void addKsi(HmmState from, HmmState to, double val) {
@@ -194,7 +194,7 @@ public class Params {
 			for(Entry<FrameFeatures, Double> entry : observations.entrySet()) {
 				FrameFeatures o = entry.getKey();
 				for(int i = 0; i < FrameFeatures.FEATURES_COUNT; i++) {
-					result[i] += Math.pow(o.getValue(i) - mean[i], 2);
+					result[i] += entry.getValue() * Math.pow(o.getValue(i) - mean[i], 2);
 				}
 			}
 			return result;

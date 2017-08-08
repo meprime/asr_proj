@@ -17,6 +17,7 @@ public class ForwardBackward {
 	public double[][] forward(HMM hmm, List<FrameFeatures> features) {
 		double[][] alpha = new double[features.size()][hmm.getStatesCount()];
 		// initialization
+		double likelihood = 0;
 		alpha[0][0] = hmm.getInitialState().getProbability(features.get(0)) / hmm.getInitialState().getProbability(features.get(0));
 		for(int t = 1; t < features.size(); t++) {
 			double c = 0;
@@ -31,7 +32,9 @@ public class ForwardBackward {
 			for(int i = 0; i < hmm.getStatesCount(); i++) {
 				alpha[t][i] /= c;
 			}
+			likelihood -= Math.log(c);
 		}
+		System.out.println("likelihood: " + likelihood);
 		return alpha;
 	}
 

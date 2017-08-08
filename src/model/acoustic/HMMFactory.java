@@ -10,7 +10,7 @@ import java.util.Map;
 import java.util.Scanner;
 import java.util.Set;
 
-import util.MyProperties;
+import main.MyProperties;
 import model.Phoneme;
 
 public class HMMFactory {
@@ -24,12 +24,12 @@ public class HMMFactory {
 		return instance;
 	}
 	
-	public HMMFactory() {
+	private HMMFactory() {
 		baseHmms = new HashMap<Phoneme, HMM>();
-		baseHmms.put(Phoneme.A, HMMFactory.getInstance().createPhonemeHMM());
-		baseHmms.put(Phoneme.N, HMMFactory.getInstance().createPhonemeHMM());
-		baseHmms.put(Phoneme.S, HMMFactory.getInstance().createPhonemeHMM());
-		baseHmms.put(Phoneme.SIL, HMMFactory.getInstance().createSilenceHMM());
+		baseHmms.put(Phoneme.A, this.createPhonemeHMM());
+		baseHmms.put(Phoneme.N, this.createPhonemeHMM());
+		baseHmms.put(Phoneme.S, this.createPhonemeHMM());
+		baseHmms.put(Phoneme.SIL, this.createSilenceHMM());
 	}
 	
 	public Map<Phoneme, HMM> getBaseHmms() {
@@ -79,6 +79,7 @@ public class HMMFactory {
 					wordPhonemeHmms.add(newPhonemeHmm);
 				}
 				HMM wordHmm = this.concatenate(wordPhonemeHmms);
+				wordHmm.getStates().remove(wordHmm.getStates().size()-1); // removing the final state.
 				for(HmmState state : wordHmm.getStates()) {
 					stateToWordMap.put(state, word);
 				}
@@ -87,17 +88,28 @@ public class HMMFactory {
 			List<HmmState> states = new ArrayList<HmmState>();
 			Set<Transition> transitions = new HashSet<Transition>();
 			HMM silHmm = new HMM(this.getBaseHmms().get(Phoneme.getByChar(' ')));
+			states.addAll(silHmm.getStates());
+			transitions.addAll(silHmm.getTransitions());
 			for(HmmState state : silHmm.getStates()) {
 				stateToWordMap.put(state, " ");
 			}
 			double silTransitionProb = 1.0 / wordHmms.size();
 			for(HMM wordHmm : wordHmms) {
+				System.out.println("wordHmm states: " + wordHmm.getStatesCount() + ", wordHmm transitions: " + wordHmm.getTransitions().size());
 				states.addAll(wordHmm.getStates());
 				transitions.addAll(wordHmm.getTransitions());
-				transitions.add(new Transition(silHmm.getFinalState(), wordHmm.getInitialState(), silTransitionProb));
-				transitions.add(new Transition(wordHmm.getFinalState(), silHmm.getInitialState(), 1));
+				transitions.add(new Transition(silHmm.getStates().get(silHmm.getStatesCount()-2), wordHmm.getInitialState(), silTransitionProb));
+				transitions.add(new Transition(wordHmm.getStates().get(wordHmm.getStatesCount()-1), silHmm.getInitialState(), 1));
 			}
-			searchHmm = new HMM(states, transitions);
+			searchHmm = new HMM(states, transitions, true);
+			if(MyProperties.getInstance().isDebug()) {
+				for(HMM wordHmm : wordHmms) {
+					System.out.println("wordHmm:");
+					this.printHmm(wordHmm);
+				}
+				System.out.println("Search HMM:");
+				this.printHmm(searchHmm);
+			}
 			return searchHmm;
 		} catch(IOException e) {
 			throw new RuntimeException(e);
@@ -117,7 +129,7 @@ public class HMMFactory {
 		HMM result = new HMM(states, transitions);
 		for(int i = 0; i < hmms.size(); i++) {
 			HMM hmm = hmms.get(i);
-			for(int j = 0; j < hmm.getStates().size(); i++) {
+			for(int j = 0; j < hmm.getStates().size(); j++) {
 				HmmState state = hmm.getStates().get(j);
 				if(j < hmm.getStates().size()-1 || i == hmms.size()-1)
 					states.add(state);
@@ -164,5 +176,43 @@ public class HMMFactory {
 		}
 		transitions.add(tr);
 		return tr;
+	}
+	
+	public void writeTransitions() {
+		for(Transition t : this.allTransitions)
+			System.out.println(t.getProbability());
+	}
+	
+	public void printHmm(HMM hmm) {
+		List<HmmState> sortedStates = new ArrayList<>();
+		List<HmmState> initialStates = new ArrayList<>(hmm.getStates());
+		Map<HmmState, Integer> stateInds = new HashMap<>();
+		for(int i = 0; i < hmm.getStatesCount(); i++)
+			stateInds.put(hmm.getStates().get(i), i);
+		for(int i = 0; i < hmm.getStatesCount(); i++) {
+			for(int j = 0; j < initialStates.size(); j++) {
+				boolean isFirst = true;
+				for(int k = 0; k < initialStates.size(); k++) {
+					if(j != 0 && k != j && hmm.getTransitionProbablity(stateInds.get(initialStates.get(k)), stateInds.get(initialStates.get(j))) > 0) {
+						isFirst = false;
+						break;
+					}
+				}
+				if(isFirst) {
+					sortedStates.add(initialStates.get(j));
+					initialStates.remove(j);
+					break;
+				}
+			}
+		}
+		for(int i = 0; i < hmm.getStatesCount(); i++) {
+			int from = stateInds.get(sortedStates.get(i));
+			for(int j = 0; j < hmm.getStatesCount(); j++) {
+				int to = stateInds.get(sortedStates.get(j));
+				if(hmm.getTransitionProbablity(from, to) > 0) {
+					System.out.println(from + " -> " + to + ": " + hmm.getTransitionProbablity(from, to));
+				}
+			}
+		}
 	}
 }

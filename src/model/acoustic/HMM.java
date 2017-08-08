@@ -1,28 +1,31 @@
 package model.acoustic;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
 public class HMM {
 
-	private int statesCount;
 	private List<HmmState> states;
 	private Set<Transition> transitions;
-//	private List<Double> b;		// observation probabilities
-//	private List<Double> pi;	// initial probabilities
+	private boolean isSearchHmm;  // tof!
 	
-	public HMM(List<HmmState> states, Set<Transition> transitions) {
+	public HMM(List<HmmState> states, Set<Transition> transitions, boolean isSearchHmm) {
 		this.states = states;
 		this.transitions = transitions;
-		this.statesCount = states.size();
+		this.isSearchHmm = isSearchHmm;
+	}
+	
+	public HMM(List<HmmState> states, Set<Transition> transitions) {
+		this(states, transitions, false);
 	}
 	
 	// copy constructor
 	public HMM(HMM oldHmm) {
 		List<HmmState> states = new ArrayList<HmmState>();
 		for(HmmState state : oldHmm.getStates()) {
-			HmmState newState = new HmmState(state.isFinal());
+			HmmState newState = new HmmState(state.isFinal(), state.getGene());
 			newState.setCovs(state.getCovs());
 			newState.setMeans(state.getMeans());
 			newState.setWeights(state.getWeights());
@@ -33,7 +36,6 @@ public class HMM {
 	}
 	
 	public HMM(int statesCount) {
-		this.statesCount = statesCount;
 		states = new ArrayList<HmmState>();
 		for(int i = 0; i < statesCount; i++) {
 			if(i == statesCount-1)
@@ -41,9 +43,9 @@ public class HMM {
 			else
 				states.add(new HmmState(false));
 		}
+		transitions = new HashSet<>();
 	}
 	
-	// TODO Implement this method.
 	public void addTransition(int from, int to, double prob) {
 		Transition t = new Transition(states.get(from), states.get(to), prob);
 		this.transitions.add(t);
@@ -54,7 +56,7 @@ public class HMM {
 	}
 	
 	public int getStatesCount() {
-		return this.statesCount;
+		return states.size();
 	}
 	
 	public List<HmmState> getStates() {
@@ -88,6 +90,13 @@ public class HMM {
 	}
 	
 	public double getTransitionProbablity(int from, int to) {
+		if(!isSearchHmm) {
+			if(to < from || to - from > 3)
+				return 0;
+		} else {
+			if(to != 0 && (to < from || to - from > 3))
+				return 0;
+		}
 		Transition t = this.getTransition(from, to);
 		return t == null ? 0 : t.getProbability();
 	}
