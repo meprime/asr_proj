@@ -2,7 +2,6 @@ package training;
 
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -82,10 +81,10 @@ public class Trainer {
 			this.update(features, longHmms);
 			System.out.println(i + "th epoch finished.");
 		}
-		if(MyProperties.getInstance().isDebug())
+		if(MyProperties.getInstance().isDebug()) {
 			printTrainedBaseHmms();
-		if(MyProperties.getInstance().isDebug())
 			viewModelParams(longHmms);
+		}
 	}
 	
 	public void update(List<List<FrameFeatures>> allFeatures, List<HMM> hmms) {
@@ -117,12 +116,7 @@ public class Trainer {
 						params.addGamma(hmm.getStates().get(i), 0, features.get(t), gamma0);
 						params.addGamma(hmm.getStates().get(i), 1, features.get(t), gamma1);
 					} else if(!hmm.getStates().get(i).isFinal() && !features.get(t).isNullFrame()) {
-//						System.out.println("0 denominator in calculating gamma. " + p);
-//						System.out.println(Arrays.toString(hmm.getStates().get(i).getWeights()));
-//						System.out.println(Arrays.toString(hmm.getStates().get(i).getMeans()[0]));
-//						System.out.println(Arrays.toString(hmm.getStates().get(i).getMeans()[1]));
-//						System.out.println(Arrays.toString(hmm.getStates().get(i).getCovs()[0]));
-//						System.out.println(Arrays.toString(hmm.getStates().get(i).getCovs()[1]));
+						System.out.println("0 denominator in calculating gamma. " + p);
 					}
 				}
 			}

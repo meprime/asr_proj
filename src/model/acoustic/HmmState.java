@@ -1,6 +1,5 @@
 package model.acoustic;
 
-import java.util.Arrays;
 import java.util.UUID;
 
 import model.FrameFeatures;
@@ -12,7 +11,7 @@ public class HmmState {
 	private double[][] means;
 	private double[][] covs;
 	
-	private String gene; // Mysteeerious!!! 
+	private String gene; 
 	
 	public HmmState(boolean isFinal, String uid) {
 		this.isFinal = isFinal;
@@ -89,11 +88,6 @@ public class HmmState {
 		numerator /= -2;
 		numerator = Math.exp(numerator);
 		denominator = Math.sqrt(denominator);
-		if(weights[mixtureInd] * numerator / denominator == 0) {
-			System.out.println(numerator + ", " + q + ", " + denominator);
-			System.out.println(Arrays.toString(f.getValues()));
-			System.out.println(Arrays.toString(means[mixtureInd]));
-		}
 		return weights[mixtureInd] * numerator / denominator;
 	}
 }

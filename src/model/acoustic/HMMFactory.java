@@ -95,7 +95,6 @@ public class HMMFactory {
 			}
 			double silTransitionProb = 1.0 / wordHmms.size();
 			for(HMM wordHmm : wordHmms) {
-				System.out.println("wordHmm states: " + wordHmm.getStatesCount() + ", wordHmm transitions: " + wordHmm.getTransitions().size());
 				states.addAll(wordHmm.getStates());
 				transitions.addAll(wordHmm.getTransitions());
 				transitions.add(new Transition(silHmm.getStates().get(silHmm.getStatesCount()-2), wordHmm.getInitialState(), silTransitionProb));

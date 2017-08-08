@@ -40,12 +40,6 @@ public class KMeans {
 		for(int i = 0; i < MAX_ITERATIONS; i++) {
 			means[0] = this.calcMean(assignments.get(0));
 			means[1] = this.calcMean(assignments.get(1));
-//			for(int x = 0; x < 2; x++) {
-//				String s = "";
-//				for(int y = 0; y < L; y++)
-//					s += means[x][y] + " ";
-//				System.out.println(s);
-//			}
 			double newDistSum = 0;
 			assignments.set(0, new HashSet<>());
 			assignments.set(1, new HashSet<>());
